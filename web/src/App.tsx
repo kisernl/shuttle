@@ -28,7 +28,7 @@ export default function App() {
       <div className="flex h-screen items-center justify-center px-4">
         <div className="w-full max-w-md overflow-hidden rounded-xl border bg-card text-center shadow-sm">
           <img
-            src="/shuttle.png"
+            src="/shuttle-logo.png"
             alt="A shuttle"
             className="shuttle-bob mt-6 w-full select-none"
             draggable={false}
