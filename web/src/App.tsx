@@ -30,13 +30,13 @@ export default function App() {
           <img
             src="/shuttle-logo.png"
             alt="A shuttle"
-            className="shuttle-bob mt-6 w-full select-none"
+            className="mt-6 w-full select-none"
             draggable={false}
           />
           <div className="space-y-5 px-10 pb-10 pt-2">
             <h1 className="text-3xl font-semibold uppercase tracking-[0.22em]">Shuttle</h1>
             <p className="text-sm text-muted-foreground">
-              Your env vars, ferried safely to AWS Parameter Store.<br></br>
+              Your env vars, shuttled safely to AWS Parameter Store.<br></br>
               No console required.
             </p>
             {denied && (

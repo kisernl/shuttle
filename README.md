@@ -2,7 +2,7 @@
   <img src="web/public/shuttle-logo.png" alt="A shuttle" width="440" />
 </p>
 
-<h1 align="center">F E R R Y</h1>
+<h1 align="center">S H U T T L E</h1>
 
 <p align="center">
   Your env vars, ferried safely to AWS Parameter Store — no console required.
