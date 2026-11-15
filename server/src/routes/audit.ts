@@ -40,7 +40,7 @@ export function auditRoutes(app: FastifyInstance, ctx: Ctx) {
       return reply
         .headers({
           "content-type": "text/csv",
-          "content-disposition": 'attachment; filename="ferry-audit.csv"',
+          "content-disposition": 'attachment; filename="shuttle-audit.csv"',
         })
         .send(csv);
     }

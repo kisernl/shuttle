@@ -118,7 +118,7 @@ function readPolicy(resources: string[]): unknown {
     Version: "2012-10-17",
     Statement: [
       {
-        Sid: "ReadFerryEnv",
+        Sid: "ReadShuttleEnv",
         Effect: "Allow",
         Action: [
           "ssm:GetParametersByPath",
@@ -223,7 +223,7 @@ ${JSON.stringify(role.readPolicy, null, 2)}
 JSON
 aws iam create-role --role-name ${role.name} \\
   --assume-role-policy-document file://${trustFile} \\
-  --tags Key=managed-by,Value=ferry \\
+  --tags Key=managed-by,Value=shuttle \\
   || aws iam update-assume-role-policy --role-name ${role.name} \\
        --policy-document file://${trustFile}
 aws iam put-role-policy --role-name ${role.name} \\

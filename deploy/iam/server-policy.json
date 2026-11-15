@@ -2,7 +2,7 @@
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "ManageFerryParameters",
+      "Sid": "ManageShuttleParameters",
       "Effect": "Allow",
       "Action": [
         "ssm:GetParameter",

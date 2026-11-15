@@ -1,5 +1,5 @@
 import type Database from "better-sqlite3";
-import type { Config } from "@ferry/shared";
+import type { Config } from "@shuttle/shared";
 import type { makeGuard } from "./guard.js";
 import type { GithubSetupService } from "./lib/githubSetupService.js";
 import type { ParameterService } from "./lib/parameterService.js";

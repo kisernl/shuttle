@@ -1,5 +1,5 @@
 {
-  "name": "@ferry/web",
+  "name": "@shuttle/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@ferry/shared": "workspace:*",
+    "@shuttle/shared": "workspace:*",
     "@radix-ui/react-alert-dialog": "^1.1.6",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-dropdown-menu": "^2.1.6",

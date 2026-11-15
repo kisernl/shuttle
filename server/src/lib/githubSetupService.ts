@@ -15,7 +15,7 @@ import {
   type OwnerRecord,
   type RepoRecord,
   type RoleSpec,
-} from "@ferry/shared";
+} from "@shuttle/shared";
 import type Database from "better-sqlite3";
 
 /** Generates policies and scripts, and checks that roles exist.

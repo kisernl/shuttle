@@ -53,7 +53,7 @@ function probePurpose(action: string, prefix: string): string {
 /** Plain-language next step when a probe fails, based on the AWS error name. */
 function failureHint(c: Check, identity: Identity): string {
   if (/credentials|token|signature/i.test(c.detail + (c.message ?? ""))) {
-    return "The server has no usable AWS credentials. Provide them through environment variables (AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY) or attach an IAM role to the instance, task, or pod running Ferry, then restart.";
+    return "The server has no usable AWS credentials. Provide them through environment variables (AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY) or attach an IAM role to the instance, task, or pod running Shuttle, then restart.";
   }
   if (/accessdenied|unauthorized|forbidden|not authorized/i.test(c.detail + (c.message ?? ""))) {
     let hint = "The server's IAM identity isn't allowed this action. Attach the required policy below to the role or user this server runs as, and check the resource ARN matches your prefix.";
@@ -117,11 +117,11 @@ export function SetupPage({ me }: { me: Me }) {
           <CardContent>
             <ol className="list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
               <li>
-                <strong className="text-foreground">AWS credentials on this server.</strong> Ferry
+                <strong className="text-foreground">AWS credentials on this server.</strong> Shuttle
                 uses the standard AWS SDK credential chain — environment variables
                 (<code className="font-mono">AWS_ACCESS_KEY_ID</code> /{" "}
                 <code className="font-mono">AWS_SECRET_ACCESS_KEY</code>) or the IAM role attached
-                to the instance, task, or pod. There is no AWS configuration inside Ferry itself.
+                to the instance, task, or pod. There is no AWS configuration inside Shuttle itself.
               </li>
               <li>
                 <strong className="text-foreground">The required IAM policy below,</strong> attached

@@ -12,7 +12,7 @@ services:
       ALLOWED_GITHUB_ORG: ${ALLOWED_GITHUB_ORG:-}
       ADMIN_GITHUB_USERS: ${ADMIN_GITHUB_USERS}
       AWS_REGION: ${AWS_REGION}
-      FERRY_PREFIX: ${FERRY_PREFIX:-ferry}
+      SHUTTLE_PREFIX: ${SHUTTLE_PREFIX:-shuttle}
       KMS_KEY_ID: ${KMS_KEY_ID:-}
       PROTECTED_ENVS: ${PROTECTED_ENVS:-production}
       TRUST_PROXY: "true"
@@ -20,7 +20,7 @@ services:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
     volumes:
-      - ferry-data:/data
+      - shuttle-data:/data
     restart: unless-stopped
 
   caddy:
@@ -37,6 +37,6 @@ services:
     restart: unless-stopped
 
 volumes:
-  ferry-data:
+  shuttle-data:
   caddy-data:
   caddy-config:

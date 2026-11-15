@@ -18,9 +18,9 @@ export function DocsPage({ me }: { me: Me }) {
   return (
     <div className="max-w-2xl space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">How Ferry works</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">How Shuttle works</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Ferry is a web interface over AWS SSM Parameter Store. Secret values live in your AWS
+          Shuttle is a web interface over AWS SSM Parameter Store. Secret values live in your AWS
           account, encrypted with KMS — they are never stored in this app's database, which only
           holds users, sessions, an audit log, and GitHub mappings.
         </p>
@@ -29,8 +29,8 @@ export function DocsPage({ me }: { me: Me }) {
       <Section title="Projects, environments, and keys">
         <p>
           Secrets are organized as <strong>project → environment → key</strong>. Each key becomes a
-          parameter in SSM at <K>/ferry/&lt;project&gt;/&lt;env&gt;/&lt;KEY&gt;</K> — for example{" "}
-          <K>/ferry/myapp/production/DATABASE_URL</K>.
+          parameter in SSM at <K>/shuttle/&lt;project&gt;/&lt;env&gt;/&lt;KEY&gt;</K> — for example{" "}
+          <K>/shuttle/myapp/production/DATABASE_URL</K>.
         </p>
         <p>
           You can create projects here, or create parameters directly with the AWS CLI under the
@@ -72,7 +72,7 @@ export function DocsPage({ me }: { me: Me }) {
       <Section title="GitHub Actions">
         <p>
           The GitHub page generates IAM roles so CI workflows can read secrets directly from AWS via
-          OIDC — no AWS keys stored in GitHub, and CI keeps working even if Ferry is down.
+          OIDC — no AWS keys stored in GitHub, and CI keeps working even if Shuttle is down.
         </p>
         <ul className="list-disc space-y-1 pl-5">
           <li><strong>All repos</strong> — one shared role per environment; every repo under the owner can use it. Simpler, less isolation.</li>
@@ -98,11 +98,11 @@ export function DocsPage({ me }: { me: Me }) {
       <Section title="Keyboard / CLI cheats">
         <p>
           Parameters created outside the app appear after <strong>Rescan AWS</strong>. Example CLI
-          write that Ferry will pick up:
+          write that Shuttle will pick up:
         </p>
         <pre className="overflow-x-auto rounded-md border bg-muted p-3 font-mono text-xs">
 {`aws ssm put-parameter \\
-  --name /ferry/myapp/staging/NEW_KEY \\
+  --name /shuttle/myapp/staging/NEW_KEY \\
   --value 'secret' --type SecureString`}
         </pre>
       </Section>

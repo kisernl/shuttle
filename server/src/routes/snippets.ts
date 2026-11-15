@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import type { Ctx } from "../ctx.js";
-import { projectRoleName, sharedRoleName } from "@ferry/shared";
+import { projectRoleName, sharedRoleName } from "@shuttle/shared";
 import { envParams } from "./keys.js";
 
 function workflowYaml(opts: {
@@ -25,7 +25,7 @@ function workflowYaml(opts: {
           role-to-assume: arn:aws:iam::${accountId}:role/${roleName}
           aws-region: ${region}
 
-      - name: Load env from Ferry
+      - name: Load env from Shuttle
         run: |
           aws ssm get-parameters-by-path \\
             --path "/${prefix}/${project}/${env}/" \\
@@ -38,7 +38,7 @@ function workflowYaml(opts: {
             while IFS= read -r line; do
               echo "::add-mask::$line"
             done <<<"$value"
-            delim="ferry_$(openssl rand -hex 8)"
+            delim="shuttle_$(openssl rand -hex 8)"
             printf '%s<<%s\\n%s\\n%s\\n' "$name" "$delim" "$value" "$delim" >> "$GITHUB_ENV"
           done
 `;
@@ -52,7 +52,7 @@ export function snippetsRoutes(app: FastifyInstance, ctx: Ctx) {
     { preHandler: [guard.requireRole("viewer")] },
     async (req) => {
       const { project, env } = envParams(req);
-      const prefix = config.FERRY_PREFIX;
+      const prefix = config.SHUTTLE_PREFIX;
       const region = config.AWS_REGION;
       const { repo } = req.query as { repo?: string };
       const accountId = await github.getAccountId();
@@ -81,7 +81,7 @@ export function snippetsRoutes(app: FastifyInstance, ctx: Ctx) {
       }
 
       const iamStatement = {
-        Sid: "ReadFerryEnv",
+        Sid: "ReadShuttleEnv",
         Effect: "Allow",
         Action: [
           "ssm:GetParametersByPath",

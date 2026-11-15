@@ -5,7 +5,7 @@ import {
   envPatchSchema,
   isValidSlug,
   projectCreateSchema,
-} from "@ferry/shared";
+} from "@shuttle/shared";
 import { protectedEnvDefaults } from "../config.js";
 import { audit } from "../lib/audit.js";
 import { badRequest, notFound } from "../lib/errors.js";
@@ -73,7 +73,7 @@ export function projectRoutes(app: FastifyInstance, ctx: Ctx) {
     if (!db.prepare("SELECT 1 FROM projects WHERE name = ?").get(project)) {
       throw notFound("project not found");
     }
-    const keys = await params.listNamesUnder(`/${ctx.config.FERRY_PREFIX}/${project}/`);
+    const keys = await params.listNamesUnder(`/${ctx.config.SHUTTLE_PREFIX}/${project}/`);
     if (keys.length > 0 && !force) {
       throw badRequest(
         "NOT_EMPTY",
@@ -81,7 +81,7 @@ export function projectRoutes(app: FastifyInstance, ctx: Ctx) {
       );
     }
     if (force && keys.length > 0) {
-      await params.deleteAllUnder(`/${ctx.config.FERRY_PREFIX}/${project}/`);
+      await params.deleteAllUnder(`/${ctx.config.SHUTTLE_PREFIX}/${project}/`);
     }
     db.prepare("DELETE FROM projects WHERE name = ?").run(project);
     audit(db, {
@@ -129,7 +129,7 @@ export function projectRoutes(app: FastifyInstance, ctx: Ctx) {
       throw notFound("environment not found");
     }
     const keys = await params.listNamesUnder(
-      `/${ctx.config.FERRY_PREFIX}/${project}/${env}/`,
+      `/${ctx.config.SHUTTLE_PREFIX}/${project}/${env}/`,
     );
     if (keys.length > 0 && !force) {
       throw badRequest(
@@ -138,7 +138,7 @@ export function projectRoutes(app: FastifyInstance, ctx: Ctx) {
       );
     }
     if (force && keys.length > 0) {
-      await params.deleteAllUnder(`/${ctx.config.FERRY_PREFIX}/${project}/${env}/`);
+      await params.deleteAllUnder(`/${ctx.config.SHUTTLE_PREFIX}/${project}/${env}/`);
     }
     db.prepare("DELETE FROM environments WHERE project = ? AND name = ?").run(project, env);
     audit(db, {

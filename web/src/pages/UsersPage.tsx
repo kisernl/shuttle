@@ -29,10 +29,23 @@ export function UsersPage({ me }: { me: Me }) {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Users</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Admins are configured via <code>ADMIN_GITHUB_USERS</code> and are not listed as such here —
-          this table toggles everyone else between viewer and editor.
-        </p>
+        <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+          <li>
+            Sign-in access is set by <code>ALLOWED_GITHUB_USERS</code> and{" "}
+            <code>ALLOWED_GITHUB_ORG</code> — this page manages roles for people already allowed in,
+            not membership.
+          </li>
+          <li>
+            Admins are configured via <code>ADMIN_GITHUB_USERS</code> and keep admin powers whatever
+            role is shown here.
+          </li>
+          <li>
+            <strong>Restricted</strong> editors can't write to protected environments.
+          </li>
+          <li>
+            Revoking sessions forces a fresh sign-in but doesn't block someone who's still allowed.
+          </li>
+        </ul>
       </div>
       <div className="rounded-lg border bg-card">
         <Table>
@@ -74,7 +87,9 @@ export function UsersPage({ me }: { me: Me }) {
                         } catch (err) { toast.error((err as Error).message); }
                       }}
                     />
-                    {u.restricted && <Badge variant="warning">no protected envs</Badge>}
+                    <Badge variant="warning" className={u.restricted ? "" : "invisible"}>
+                      no protected envs
+                    </Badge>
                   </label>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">

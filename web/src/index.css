@@ -84,11 +84,11 @@ body {
     "Liberation Mono", monospace;
 }
 
-@keyframes ferry-bob {
+@keyframes shuttle-bob {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-6px) rotate(-0.5deg); }
 }
 
-.ferry-bob {
-  animation: ferry-bob 3.2s ease-in-out infinite;
+.shuttle-bob {
+  animation: shuttle-bob 3.2s ease-in-out infinite;
 }

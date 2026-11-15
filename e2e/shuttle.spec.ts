@@ -9,7 +9,7 @@ async function signIn(page: Page, login: string, role?: string) {
   const { sessionId } = await res.json();
   await page.context().addCookies([
     {
-      name: "__Host-ferry-session",
+      name: "__Host-shuttle-session",
       value: sessionId,
       domain: "localhost",
       path: "/",
@@ -17,7 +17,7 @@ async function signIn(page: Page, login: string, role?: string) {
       httpOnly: true,
     },
     {
-      name: "ferry-csrf",
+      name: "shuttle-csrf",
       value: "e2e-csrf",
       domain: "localhost",
       path: "/",
@@ -25,7 +25,7 @@ async function signIn(page: Page, login: string, role?: string) {
   ]);
 }
 
-test.describe("ferry e2e", () => {
+test.describe("shuttle e2e", () => {
   test("admin sees projects and can create one", async ({ page }) => {
     await signIn(page, "e2e-admin");
     await page.goto("/");

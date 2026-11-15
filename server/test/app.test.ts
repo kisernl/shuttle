@@ -13,13 +13,13 @@ import {
 import { IAMClient } from "@aws-sdk/client-iam";
 import { STSClient, GetCallerIdentityCommand } from "@aws-sdk/client-sts";
 import type { FastifyInstance } from "fastify";
-import { configSchema } from "@ferry/shared";
+import { configSchema } from "@shuttle/shared";
 import { buildApp } from "../src/app.js";
 import { openDb } from "../src/db.js";
 
 process.env.NODE_ENV = "test";
 
-const dir = mkdtempSync(join(tmpdir(), "ferry-test-"));
+const dir = mkdtempSync(join(tmpdir(), "shuttle-test-"));
 const db = openDb(dir);
 const ssm = new SSMClient({ region: "us-east-1" });
 const iam = new IAMClient({ region: "us-east-1" });
@@ -43,7 +43,7 @@ let session: string;
 
 const CSRF = "test-csrf-token";
 const authed = () => ({
-  cookie: `__Host-ferry-session=${session}; ferry-csrf=${CSRF}`,
+  cookie: `__Host-shuttle-session=${session}; shuttle-csrf=${CSRF}`,
 });
 const write = () => ({
   ...authed(),
@@ -55,7 +55,7 @@ beforeAll(async () => {
   app = await buildApp({ config, db, ssm, iam, sts });
   stsMock.on(GetCallerIdentityCommand).resolves({
     Account: "123456789012",
-    Arn: "arn:aws:iam::123456789012:role/ferry",
+    Arn: "arn:aws:iam::123456789012:role/shuttle",
   });
   const res = await app.inject({
     method: "POST",
@@ -143,7 +143,7 @@ describe("projects and keys", () => {
 
     ssmMock.reset();
     ssmMock.on(GetParameterCommand).resolves({
-      Parameter: { Name: "/ferry/myapp/development/API_KEY", Value: "secret-value", Version: 1 },
+      Parameter: { Name: "/shuttle/myapp/development/API_KEY", Value: "secret-value", Version: 1 },
     });
     const reveal = await app.inject({
       method: "GET",
@@ -157,7 +157,7 @@ describe("projects and keys", () => {
 
   it("lists keys via DescribeParameters", async () => {
     ssmMock.on(DescribeParametersCommand).resolves({
-      Parameters: [{ Name: "/ferry/myapp/development/API_KEY", Version: 1 }],
+      Parameters: [{ Name: "/shuttle/myapp/development/API_KEY", Version: 1 }],
     });
     const res = await app.inject({
       method: "GET",

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="web/public/ferry-logo.png" alt="A ferry" width="440" />
+  <img src="web/public/shuttle-logo.png" alt="A shuttle" width="440" />
 </p>
 
 <h1 align="center">F E R R Y</h1>
@@ -9,7 +9,7 @@
 </p>
 
 A self-hosted web app that puts a simple `.env`-style interface over AWS SSM
-Parameter Store. Deploy one container at `ferry.myapp.com`; every secret value
+Parameter Store. Deploy one container at `shuttle.myapp.com`; every secret value
 stays in your own AWS account, encrypted with KMS. The app never stores a
 secret — its SQLite database holds only users, sessions, audit log and GitHub
 mappings.
@@ -22,7 +22,7 @@ mappings.
 - Download any environment as a `.env` file; copy between environments; diff two environments
 - GitHub OAuth sign-in, viewer/editor/admin roles, protected environments
 - GitHub Actions integration through OIDC — the app generates IAM roles and a
-  one-time setup script; CI reads straight from AWS (works even if Ferry is down)
+  one-time setup script; CI reads straight from AWS (works even if Shuttle is down)
 - $0 in AWS fees for typical use (Parameter Store Standard tier)
 
 ## Architecture
@@ -54,13 +54,13 @@ Local AWS calls can point at LocalStack:
 
 ```bash
 docker run -p 4566:4566 localstack/localstack
-AWS_ENDPOINT_URL=http://localhost:4566 pnpm --filter @ferry/server dev
+AWS_ENDPOINT_URL=http://localhost:4566 pnpm --filter @shuttle/server dev
 ```
 
 (The AWS SDK v3 honors `AWS_ENDPOINT_URL` for local endpoints.)
 
 Tests: `pnpm -r test` (unit + service). LocalStack suite:
-`FERRY_TEST_LOCALSTACK=1 pnpm --filter @ferry/server test`.
+`SHUTTLE_TEST_LOCALSTACK=1 pnpm --filter @shuttle/server test`.
 E2E: see `e2e/playwright.config.ts` header.
 
 ## Deploy
@@ -78,15 +78,15 @@ Quickstart:
 ```bash
 cd deploy
 cp .env.example .env   # fill in; SESSION_SECRET=$(openssl rand -hex 32)
-./iam/fill.sh 123456789012 us-east-1 ferry   # then attach the policy to your instance role / IAM user
+./iam/fill.sh 123456789012 us-east-1 shuttle   # then attach the policy to your instance role / IAM user
 docker compose up -d
 ```
 
 ### GitHub OAuth App
 
 Create a GitHub OAuth App at github.com → Settings → Developer settings:
-- Homepage URL: `https://ferry.myapp.com`
-- Callback URL: `https://ferry.myapp.com/api/auth/github/callback`
+- Homepage URL: `https://shuttle.myapp.com`
+- Callback URL: `https://shuttle.myapp.com/api/auth/github/callback`
 
 Set `GITHUB_CLIENT_ID`/`GITHUB_CLIENT_SECRET`, then
 `ALLOWED_GITHUB_USERS` and/or `ALLOWED_GITHUB_ORG`, and `ADMIN_GITHUB_USERS`.
@@ -113,6 +113,8 @@ the GitHub Environment carry over.
 - Rate limits on logins, API calls, reveals and the setup probe.
 - The server's IAM policy is scoped to `parameter/{PREFIX}/*` and can't write IAM.
 - AWS CloudTrail records every Parameter Store call — that is your independent
-  audit trail alongside Ferry's own audit log.
+  audit trail alongside Shuttle's own audit log.
 
 See [SECURITY.md](SECURITY.md) to report a vulnerability.
+
+<a href="https://www.flaticon.com/free-icons/space" title="space icons">Space icons created by monkik - Flaticon</a>

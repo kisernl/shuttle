@@ -4,7 +4,7 @@
 set -euo pipefail
 ACCOUNT="${1:?account id required}"
 REGION="${2:?region required}"
-PREFIX="${3:-ferry}"
+PREFIX="${3:-shuttle}"
 DIR="$(cd "$(dirname "$0")" && pwd)"
 for f in server-policy.json optional-check-policy.json; do
   sed -e "s/{ACCOUNT_ID}/$ACCOUNT/g" -e "s/{REGION}/$REGION/g" -e "s/{PREFIX}/$PREFIX/g" \

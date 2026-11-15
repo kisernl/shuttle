@@ -11,7 +11,7 @@ import { ParameterService } from "../src/lib/parameterService.js";
 
 const ssm = new SSMClient({ region: "us-east-1" });
 const ssmMock = mockClient(ssm);
-const svc = new ParameterService(ssm, "ferry");
+const svc = new ParameterService(ssm, "shuttle");
 
 beforeEach(() => ssmMock.reset());
 
@@ -21,13 +21,13 @@ describe("listEnv", () => {
       .on(DescribeParametersCommand)
       .resolvesOnce({
         Parameters: [
-          { Name: "/ferry/app/prod/A", Version: 1 },
-          { Name: "/ferry/app/prod/B", Version: 2 },
+          { Name: "/shuttle/app/prod/A", Version: 1 },
+          { Name: "/shuttle/app/prod/B", Version: 2 },
         ],
         NextToken: "t2",
       })
       .resolvesOnce({
-        Parameters: [{ Name: "/ferry/app/prod/C", Version: 1 }],
+        Parameters: [{ Name: "/shuttle/app/prod/C", Version: 1 }],
       });
     const keys = await svc.listEnv("app", "prod");
     expect(keys.map((k) => k.key)).toEqual(["A", "B", "C"]);
@@ -44,11 +44,11 @@ describe("put", () => {
       .rejectsOnce(Object.assign(new Error("nf"), { name: "ParameterNotFound" }));
     ssmMock.on(PutParameterCommand).resolves({ Version: 1 });
     await svc.put("app", "prod", "KEY", "v", {
-      tags: { "managed-by": "ferry" },
+      tags: { "managed-by": "shuttle" },
     });
     const call = ssmMock.commandCalls(PutParameterCommand)[0]!;
     expect(call.args[0].input.Tags).toEqual([
-      { Key: "managed-by", Value: "ferry" },
+      { Key: "managed-by", Value: "shuttle" },
     ]);
     expect(call.args[0].input.Type).toBe("SecureString");
     expect(call.args[0].input.Tier).toBe("Standard");
@@ -56,7 +56,7 @@ describe("put", () => {
 
   it("omits tags on update", async () => {
     ssmMock.on(GetParameterCommand).resolves({
-      Parameter: { Name: "/ferry/app/prod/K", Version: 3 },
+      Parameter: { Name: "/shuttle/app/prod/K", Version: 3 },
     });
     ssmMock.on(PutParameterCommand).resolves({ Version: 4 });
     await svc.put("app", "prod", "K", "v", { tags: { a: "b" } });
@@ -67,7 +67,7 @@ describe("put", () => {
 
   it("returns VERSION_CONFLICT on stale expectedVersion", async () => {
     ssmMock.on(GetParameterCommand).resolves({
-      Parameter: { Name: "/ferry/app/prod/K", Version: 5 },
+      Parameter: { Name: "/shuttle/app/prod/K", Version: 5 },
     });
     await expect(
       svc.put("app", "prod", "K", "v", { expectedVersion: 4 }),
@@ -81,11 +81,11 @@ describe("getAllValues", () => {
     ssmMock
       .on(GetParametersByPathCommand)
       .resolvesOnce({
-        Parameters: [{ Name: "/ferry/app/prod/A", Value: "1" }],
+        Parameters: [{ Name: "/shuttle/app/prod/A", Value: "1" }],
         NextToken: "x",
       })
       .resolvesOnce({
-        Parameters: [{ Name: "/ferry/app/prod/B", Value: "2" }],
+        Parameters: [{ Name: "/shuttle/app/prod/B", Value: "2" }],
       });
     const values = await svc.getAllValues("app", "prod");
     expect(Object.fromEntries(values)).toEqual({ A: "1", B: "2" });

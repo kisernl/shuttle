@@ -45,15 +45,15 @@ describe("naming rules", () => {
 
 describe("paths", () => {
   it("builds env paths and param names", () => {
-    expect(envPath("ferry", "myapp", "production")).toBe("/ferry/myapp/production");
-    expect(paramName("ferry", "myapp", "production", "API_KEY")).toBe(
-      "/ferry/myapp/production/API_KEY",
+    expect(envPath("shuttle", "myapp", "production")).toBe("/shuttle/myapp/production");
+    expect(paramName("shuttle", "myapp", "production", "API_KEY")).toBe(
+      "/shuttle/myapp/production/API_KEY",
     );
   });
 
   it("extracts keys and parses param paths", () => {
-    expect(keyFromParam("/ferry/a/b/MY_KEY")).toBe("MY_KEY");
-    expect(parseParamPath("ferry", "/ferry/app/prod/KEY")).toEqual({
+    expect(keyFromParam("/shuttle/a/b/MY_KEY")).toBe("MY_KEY");
+    expect(parseParamPath("shuttle", "/shuttle/app/prod/KEY")).toEqual({
       project: "app",
       env: "prod",
       key: "KEY",
@@ -61,9 +61,9 @@ describe("paths", () => {
   });
 
   it("rejects paths outside the prefix or with bad segments", () => {
-    expect(parseParamPath("ferry", "/other/app/prod/KEY")).toBeNull();
-    expect(parseParamPath("ferry", "/ferry/app/prod")).toBeNull();
-    expect(parseParamPath("ferry", "/ferry/app/prod/KEY/extra")).toBeNull();
-    expect(parseParamPath("ferry", "/ferry/Bad/prod/KEY")).toBeNull();
+    expect(parseParamPath("shuttle", "/other/app/prod/KEY")).toBeNull();
+    expect(parseParamPath("shuttle", "/shuttle/app/prod")).toBeNull();
+    expect(parseParamPath("shuttle", "/shuttle/app/prod/KEY/extra")).toBeNull();
+    expect(parseParamPath("shuttle", "/shuttle/Bad/prod/KEY")).toBeNull();
   });
 });

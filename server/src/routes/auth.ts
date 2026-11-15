@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import type Database from "better-sqlite3";
-import type { Config } from "@ferry/shared";
+import type { Config } from "@shuttle/shared";
 import { allowedUserLogins } from "../config.js";
 import { audit } from "../lib/audit.js";
 import { ApiError } from "../lib/errors.js";
@@ -16,7 +16,7 @@ import {
 const GITHUB_AUTHORIZE = "https://github.com/login/oauth/authorize";
 const GITHUB_TOKEN = "https://github.com/login/oauth/access_token";
 const GITHUB_API = "https://api.github.com";
-const STATE_COOKIE = "ferry-oauth-state";
+const STATE_COOKIE = "shuttle-oauth-state";
 
 export function authRoutes(app: FastifyInstance, db: Database.Database, config: Config) {
   const secure = config.PUBLIC_URL.startsWith("https://");
@@ -143,7 +143,7 @@ async function ghFetch(url: string, token: string): Promise<unknown> {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/vnd.github+json",
-      "User-Agent": "ferry",
+      "User-Agent": "shuttle",
     },
   });
   if (!res.ok) throw new ApiError(502, "GITHUB_API", `GitHub API ${res.status}`);

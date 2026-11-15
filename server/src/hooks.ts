@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
-import type { Config } from "@ferry/shared";
+import type { Config } from "@shuttle/shared";
 import { ApiError } from "./lib/errors.js";
 import type { RateLimiter } from "./lib/rateLimit.js";
 import { CSRF_COOKIE, CSRF_HEADER, SESSION_COOKIE } from "./lib/session.js";

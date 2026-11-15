@@ -5,7 +5,7 @@ import {
   ownerCreateSchema,
   ownerPatchSchema,
   repoAddSchema,
-} from "@ferry/shared";
+} from "@shuttle/shared";
 import { audit } from "../lib/audit.js";
 import { badRequest, notFound } from "../lib/errors.js";
 import { user } from "../guard.js";

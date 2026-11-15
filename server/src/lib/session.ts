@@ -1,8 +1,8 @@
 import { randomBytes } from "node:crypto";
 import type Database from "better-sqlite3";
 
-export const SESSION_COOKIE = "__Host-ferry-session";
-export const CSRF_COOKIE = "ferry-csrf";
+export const SESSION_COOKIE = "__Host-shuttle-session";
+export const CSRF_COOKIE = "shuttle-csrf";
 export const CSRF_HEADER = "x-csrf-token";
 
 export const SESSION_ABSOLUTE_MS = 12 * 60 * 60 * 1000; // 12h

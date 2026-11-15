@@ -1,10 +1,10 @@
 /** Integration test against LocalStack SSM. Runs only when
- *  FERRY_TEST_LOCALSTACK=1 (CI provides a LocalStack service container). */
+ *  SHUTTLE_TEST_LOCALSTACK=1 (CI provides a LocalStack service container). */
 import { describe, expect, it, beforeAll } from "vitest";
 import { SSMClient } from "@aws-sdk/client-ssm";
 import { ParameterService } from "../src/lib/parameterService.js";
 
-const RUN = process.env.FERRY_TEST_LOCALSTACK === "1";
+const RUN = process.env.SHUTTLE_TEST_LOCALSTACK === "1";
 const endpoint = process.env.LOCALSTACK_ENDPOINT ?? "http://localhost:4566";
 
 const ssm = new SSMClient({
@@ -12,7 +12,7 @@ const ssm = new SSMClient({
   endpoint,
   credentials: { accessKeyId: "test", secretAccessKey: "test" },
 });
-const svc = new ParameterService(ssm, "ferry-it");
+const svc = new ParameterService(ssm, "shuttle-it");
 
 describe.skipIf(!RUN)("LocalStack SSM", () => {
   beforeAll(async () => {
@@ -55,6 +55,6 @@ describe.skipIf(!RUN)("LocalStack SSM", () => {
     expect(results.every((r) => r.ok)).toBe(true);
     const all = await svc.getAllValues("itproj", "staging");
     expect(all.get("BULK_11")).toBe("v11");
-    await svc.deleteAllUnder("/ferry-it/");
+    await svc.deleteAllUnder("/shuttle-it/");
   });
 });

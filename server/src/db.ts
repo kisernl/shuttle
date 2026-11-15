@@ -75,7 +75,7 @@ CREATE TABLE github_repos (
 
 export function openDb(dataDir: string): Database.Database {
   mkdirSync(dataDir, { recursive: true });
-  const db = new Database(join(dataDir, "ferry.db"));
+  const db = new Database(join(dataDir, "shuttle.db"));
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
   migrate(db);

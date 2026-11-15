@@ -14,7 +14,7 @@ import {
   keyFromParam,
   paramName,
   parseParamPath,
-} from "@ferry/shared";
+} from "@shuttle/shared";
 import { ApiError, badRequest, mapAwsError } from "./errors.js";
 
 export interface KeyMeta {
@@ -289,9 +289,9 @@ export class ParameterService {
             ? { description: e.description }
             : {}),
           tags: {
-            "managed-by": "ferry",
-            "ferry-project": project,
-            "ferry-env": env,
+            "managed-by": "shuttle",
+            "shuttle-project": project,
+            "shuttle-env": env,
           },
         });
         return { key: e.key, ok: true, version: res.version };

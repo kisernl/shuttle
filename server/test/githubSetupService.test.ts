@@ -18,12 +18,12 @@ const iamMock = mockClient(iam);
 const stsMock = mockClient(sts);
 
 function svc() {
-  const db = openDb(mkdtempSync(join(tmpdir(), "ferry-gh-")));
+  const db = openDb(mkdtempSync(join(tmpdir(), "shuttle-gh-")));
   db.prepare("INSERT INTO projects (name) VALUES ('myapp')").run();
   db.prepare(
     "INSERT INTO environments (project, name) VALUES ('myapp', 'production')",
   ).run();
-  return { db, svc: new GithubSetupService(db, iam, sts, "ferry", "us-east-1") };
+  return { db, svc: new GithubSetupService(db, iam, sts, "shuttle", "us-east-1") };
 }
 
 beforeEach(() => {
@@ -43,12 +43,12 @@ describe("check", () => {
     const { db, svc: s } = svc();
     db.prepare("INSERT INTO github_owners (owner, mode) VALUES ('acme', 'all')").run();
     iamMock.on(GetOpenIDConnectProviderCommand).resolves({});
-    iamMock.on(GetRoleCommand).resolves({ Role: { RoleName: "ferry-production" } as never });
+    iamMock.on(GetRoleCommand).resolves({ Role: { RoleName: "shuttle-production" } as never });
     const res = await s.check();
     expect(res).toMatchObject({
       available: true,
       provider: true,
-      roles: [{ name: "ferry-production", ok: true }],
+      roles: [{ name: "shuttle-production", ok: true }],
     });
   });
 

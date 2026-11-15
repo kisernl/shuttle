@@ -8,22 +8,22 @@ import {
 } from "../src/policies.js";
 
 const base = {
-  prefix: "ferry",
+  prefix: "shuttle",
   accountId: "123456789012",
   region: "us-east-1",
 };
 
 describe("role names", () => {
   it("builds shared and project role names", () => {
-    expect(sharedRoleName("ferry", "production")).toBe("ferry-production");
-    expect(projectRoleName("ferry", "myapp", "production")).toBe(
-      "ferry-myapp-production",
+    expect(sharedRoleName("shuttle", "production")).toBe("shuttle-production");
+    expect(projectRoleName("shuttle", "myapp", "production")).toBe(
+      "shuttle-myapp-production",
     );
   });
 
   it("rejects names over 64 chars", () => {
     expect(() =>
-      projectRoleName("ferry", "p".repeat(40), "e".repeat(30)),
+      projectRoleName("shuttle", "p".repeat(40), "e".repeat(30)),
     ).toThrow(PolicyError);
   });
 });
@@ -38,8 +38,8 @@ describe("buildRoles", () => {
       projects: ["myapp"],
     });
     expect(roles.map((r) => r.name)).toEqual([
-      "ferry-production",
-      "ferry-staging",
+      "shuttle-production",
+      "shuttle-staging",
     ]);
     const trust = roles[0]!.trustPolicy as any;
     expect(trust.Statement[0].Condition.StringLike[
@@ -82,10 +82,10 @@ describe("buildRoles", () => {
       projects: ["myapp", "otherapp", "emptyapp"],
     });
     expect(roles.map((r) => r.name).sort()).toEqual([
-      "ferry-myapp-production",
-      "ferry-otherapp-production",
+      "shuttle-myapp-production",
+      "shuttle-otherapp-production",
     ]);
-    const myapp = roles.find((r) => r.name === "ferry-myapp-production")!;
+    const myapp = roles.find((r) => r.name === "shuttle-myapp-production")!;
     const subs = (myapp.trustPolicy as any).Statement[0].Condition.StringLike[
       "token.actions.githubusercontent.com:sub"
     ];
@@ -166,9 +166,9 @@ describe("buildSetupScript", () => {
     });
     const script = buildSetupScript(roles);
     expect(script).toContain("create-open-id-connect-provider");
-    expect(script).toContain("--role-name ferry-production");
+    expect(script).toContain("--role-name shuttle-production");
     expect(script).toContain("put-role-policy");
     expect(script).toContain("--policy-name read-env");
-    expect(script).toContain("managed-by,Value=ferry");
+    expect(script).toContain("managed-by,Value=shuttle");
   });
 });

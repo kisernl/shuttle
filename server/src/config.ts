@@ -1,4 +1,4 @@
-import { configSchema, type Config } from "@ferry/shared";
+import { configSchema, type Config } from "@shuttle/shared";
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const result = configSchema.safeParse(env);
@@ -6,7 +6,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     const problems = result.error.issues
       .map((i) => `  ${i.path.join(".") || "(root)"}: ${i.message}`)
       .join("\n");
-    console.error(`ferry: invalid configuration\n${problems}`);
+    console.error(`shuttle: invalid configuration\n${problems}`);
     process.exit(1);
   }
   return result.data;

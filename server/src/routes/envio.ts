@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import type { Ctx } from "../ctx.js";
-import { copySchema, importSchema, parseEnv, serializeEnv } from "@ferry/shared";
+import { copySchema, importSchema, parseEnv, serializeEnv } from "@shuttle/shared";
 import { audit } from "../lib/audit.js";
 import { badRequest, notFound } from "../lib/errors.js";
 import { user } from "../guard.js";

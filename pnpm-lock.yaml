@@ -41,7 +41,7 @@ importers:
       '@fastify/static':
         specifier: ^8.0.4
         version: 8.3.0
-      '@ferry/shared':
+      '@shuttle/shared':
         specifier: workspace:*
         version: link:../shared
       better-sqlite3:
@@ -94,7 +94,7 @@ importers:
 
   web:
     dependencies:
-      '@ferry/shared':
+      '@shuttle/shared':
         specifier: workspace:*
         version: link:../shared
       '@radix-ui/react-alert-dialog':

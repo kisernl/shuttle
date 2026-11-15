@@ -1,6 +1,6 @@
 import type { FastifyRequest } from "fastify";
 import type Database from "better-sqlite3";
-import type { Config } from "@ferry/shared";
+import type { Config } from "@shuttle/shared";
 import { adminLogins } from "./config.js";
 import { ApiError, forbidden } from "./lib/errors.js";
 import {

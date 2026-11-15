@@ -4,8 +4,8 @@ import { build } from "esbuild";
 const deps = Object.keys(
   JSON.parse(readFileSync("package.json", "utf8")).dependencies ?? {},
 );
-// Externalize real npm deps (name + subpaths); bundle workspace pkgs like @ferry/shared
-const external = deps.filter((d) => !d.startsWith("@ferry/")).flatMap((d) => [d, `${d}/*`]);
+// Externalize real npm deps (name + subpaths); bundle workspace pkgs like @shuttle/shared
+const external = deps.filter((d) => !d.startsWith("@shuttle/")).flatMap((d) => [d, `${d}/*`]);
 
 await build({
   entryPoints: ["src/index.ts"],

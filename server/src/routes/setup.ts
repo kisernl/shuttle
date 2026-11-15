@@ -8,7 +8,7 @@ function serverIamPolicy(region: string, accountId: string, prefix: string) {
     Version: "2012-10-17",
     Statement: [
       {
-        Sid: "ManageFerryParameters",
+        Sid: "ManageShuttleParameters",
         Effect: "Allow",
         Action: [
           "ssm:GetParameter",
@@ -69,11 +69,11 @@ function setupPayload(ctx: Ctx, id: Awaited<ReturnType<typeof resolveIdentity>>)
       arn: id.arn,
       error: id.error,
       region: ctx.config.AWS_REGION,
-      prefix: ctx.config.FERRY_PREFIX,
+      prefix: ctx.config.SHUTTLE_PREFIX,
       kmsKeyId: ctx.config.KMS_KEY_ID ?? null,
     },
-    iamPolicy: serverIamPolicy(ctx.config.AWS_REGION, account, ctx.config.FERRY_PREFIX),
-    optionalIamPolicy: optionalIamPolicy(account, ctx.config.FERRY_PREFIX),
+    iamPolicy: serverIamPolicy(ctx.config.AWS_REGION, account, ctx.config.SHUTTLE_PREFIX),
+    optionalIamPolicy: optionalIamPolicy(account, ctx.config.SHUTTLE_PREFIX),
   };
 }
 

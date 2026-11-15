@@ -9,7 +9,7 @@ import { IAMClient } from "@aws-sdk/client-iam";
 import { STSClient } from "@aws-sdk/client-sts";
 import type Database from "better-sqlite3";
 import { ZodError } from "zod";
-import type { Config } from "@ferry/shared";
+import type { Config } from "@shuttle/shared";
 import type { Ctx } from "./ctx.js";
 import { makeGuard } from "./guard.js";
 import { registerHooks } from "./hooks.js";
@@ -66,8 +66,8 @@ export async function buildApp(opts: BuildOptions): Promise<FastifyInstance> {
   const ctx: Ctx = {
     db,
     config,
-    params: new ParameterService(ssm, config.FERRY_PREFIX, config.KMS_KEY_ID),
-    github: new GithubSetupService(db, iam, sts, config.FERRY_PREFIX, config.AWS_REGION),
+    params: new ParameterService(ssm, config.SHUTTLE_PREFIX, config.KMS_KEY_ID),
+    github: new GithubSetupService(db, iam, sts, config.SHUTTLE_PREFIX, config.AWS_REGION),
     guard: makeGuard(db, config),
   };
 

@@ -39,7 +39,7 @@ a GitHub org/repo you control.
 ## Audit & leaks
 
 - [ ] Reveals, exports, writes, logins appear in audit log; CSV export downloads
-- [ ] `grep -r "KNOWN_TEST_VALUE" /data/ferry.db` → no match
+- [ ] `grep -r "KNOWN_TEST_VALUE" /data/shuttle.db` → no match
 - [ ] App logs contain no secret values (`docker logs | grep KNOWN_TEST_VALUE`)
 - [ ] CloudTrail shows every SSM call from the instance role/user
 
@@ -54,5 +54,5 @@ a GitHub org/repo you control.
 ## Release
 
 - [ ] Tag `vX.Y.Z` → release workflow pushes signed image + SBOM to GHCR
-- [ ] `cosign verify ghcr.io/<owner>/ferry:vX.Y.Z` succeeds
+- [ ] `cosign verify ghcr.io/<owner>/shuttle:vX.Y.Z` succeeds
 - [ ] Fresh `docker run` of the tagged image passes this checklist

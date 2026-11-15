@@ -70,7 +70,7 @@ export const configSchema = z
     ALLOWED_GITHUB_ORG: z.string().optional(),
     ADMIN_GITHUB_USERS: z.string().min(1),
     AWS_REGION: z.string().min(1),
-    FERRY_PREFIX: slugSchema.default("ferry"),
+    SHUTTLE_PREFIX: slugSchema.default("shuttle"),
     KMS_KEY_ID: z.string().optional(),
     PROTECTED_ENVS: z.string().default("production"),
     DATA_DIR: z.string().default("/data"),

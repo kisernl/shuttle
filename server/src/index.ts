@@ -25,7 +25,7 @@ const app = await buildApp({
 // Best-effort rescan of the SSM prefix at startup.
 const params = new ParameterService(
   new SSMClient({ region: config.AWS_REGION }),
-  config.FERRY_PREFIX,
+  config.SHUTTLE_PREFIX,
   config.KMS_KEY_ID,
 );
 rescan(db, params, protectedEnvDefaults(config)).catch((err) => {

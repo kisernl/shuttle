@@ -36,7 +36,7 @@ export function ProjectsPage({ me }: { me: Me }) {
           <h1 className="text-2xl font-semibold tracking-tight">Projects</h1>
           <p className="text-sm text-muted-foreground">
             Each project maps to a path in AWS SSM Parameter Store —{" "}
-            <code className="font-mono text-xs">/ferry/&lt;project&gt;/&lt;env&gt;/&lt;KEY&gt;</code>.
+            <code className="font-mono text-xs">/shuttle/&lt;project&gt;/&lt;env&gt;/&lt;KEY&gt;</code>.
             Parameters created outside this app appear after a rescan.
           </p>
         </div>
@@ -58,7 +58,7 @@ export function ProjectsPage({ me }: { me: Me }) {
           <p className="font-medium text-foreground">No projects yet</p>
           <p className="mt-1">
             {isAdmin
-              ? "Create a project above, or press Rescan AWS to import parameters that already exist under the /ferry/ prefix."
+              ? "Create a project above, or press Rescan AWS to import parameters that already exist under the /shuttle/ prefix."
               : "Ask an admin to create a project or rescan AWS."}
           </p>
         </div>

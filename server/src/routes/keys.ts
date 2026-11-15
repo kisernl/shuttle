@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import type { Ctx } from "../ctx.js";
-import { isValidKey, isValidSlug, keyPutSchema, restoreSchema } from "@ferry/shared";
+import { isValidKey, isValidSlug, keyPutSchema, restoreSchema } from "@shuttle/shared";
 import { audit } from "../lib/audit.js";
 import { badRequest } from "../lib/errors.js";
 import { user } from "../guard.js";
@@ -60,9 +60,9 @@ export function keyRoutes(app: FastifyInstance, ctx: Ctx) {
           ? { expectedVersion: body.expectedVersion }
           : {}),
         tags: {
-          "managed-by": "ferry",
-          "ferry-project": project,
-          "ferry-env": env,
+          "managed-by": "shuttle",
+          "shuttle-project": project,
+          "shuttle-env": env,
         },
       });
       audit(db, { action: "key.put", userLogin: user(req).login, ip: req.ip, project, environment: env, key });
@@ -118,9 +118,9 @@ export function keyRoutes(app: FastifyInstance, ctx: Ctx) {
       const value = await params.revealVersion(project, env, key, body.version);
       const res = await params.put(project, env, key, value, {
         tags: {
-          "managed-by": "ferry",
-          "ferry-project": project,
-          "ferry-env": env,
+          "managed-by": "shuttle",
+          "shuttle-project": project,
+          "shuttle-env": env,
         },
       });
       audit(db, { action: "key.restore", userLogin: user(req).login, ip: req.ip, project, environment: env, key, detail: `restored v${body.version}` });

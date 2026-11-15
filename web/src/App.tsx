@@ -28,13 +28,13 @@ export default function App() {
       <div className="flex h-screen items-center justify-center px-4">
         <div className="w-full max-w-md overflow-hidden rounded-xl border bg-card text-center shadow-sm">
           <img
-            src="/ferry.png"
-            alt="A ferry"
-            className="ferry-bob mt-6 w-full select-none"
+            src="/shuttle.png"
+            alt="A shuttle"
+            className="shuttle-bob mt-6 w-full select-none"
             draggable={false}
           />
           <div className="space-y-5 px-10 pb-10 pt-2">
-            <h1 className="text-3xl font-semibold uppercase tracking-[0.22em]">Ferry</h1>
+            <h1 className="text-3xl font-semibold uppercase tracking-[0.22em]">Shuttle</h1>
             <p className="text-sm text-muted-foreground">
               Your env vars, ferried safely to AWS Parameter Store.<br></br>
               No console required.
@@ -60,13 +60,13 @@ export default function App() {
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r bg-card md:flex">
         <div className="px-6 pb-2 pt-7">
           <a
-            href="https://github.com/kisernl/ferry"
+            href="https://github.com/kisernl/shuttle"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2.5"
           >
-            <img src="/ferry-icon.png" alt="" className="h-6 w-auto select-none" draggable={false} />
-            <span className="text-xl font-semibold uppercase tracking-[0.22em]">Ferry</span>
+            <img src="/shuttle-icon.png" alt="" className="h-6 w-auto select-none" draggable={false} />
+            <span className="text-xl font-semibold uppercase tracking-[0.22em]">Shuttle</span>
           </a>
         </div>
         <nav className="flex-1 space-y-1 px-3 pt-4">
@@ -103,13 +103,13 @@ export default function App() {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-10 flex items-center gap-2 overflow-x-auto border-b bg-card px-4 py-3 md:hidden">
           <a
-            href="https://github.com/kisernl/ferry"
+            href="https://github.com/kisernl/shuttle"
             target="_blank"
             rel="noopener noreferrer"
             className="mr-2 flex shrink-0 items-center gap-2 font-semibold tracking-tight"
           >
-            <img src="/ferry-icon.png" alt="" className="h-6 w-auto select-none" draggable={false} />
-            <span className="uppercase tracking-[0.22em]">Ferry</span>
+            <img src="/shuttle-icon.png" alt="" className="h-6 w-auto select-none" draggable={false} />
+            <span className="uppercase tracking-[0.22em]">Shuttle</span>
           </a>
           <MobileNavLink to="/" end>Projects</MobileNavLink>
           <MobileNavLink to="/docs">Docs</MobileNavLink>
