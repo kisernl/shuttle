@@ -1,0 +1,57 @@
+# Shuttle
+
+> Shuttle is a self-hosted web app that puts a simple .env-style interface over AWS SSM Parameter Store. Secret values live in your own AWS account as SecureStrings (KMS-encrypted); the app's database never stores a secret value — only users, sessions, an audit log, and GitHub mappings.
+
+Shuttle is deployed as a single Node.js process: a Fastify API serving a React SPA (Vite + Tailwind). SQLite (better-sqlite3) on a mounted volume holds metadata only. All AWS calls go through one ParameterService layer.
+
+## How it works
+
+- Secrets are organized as project → environment → key.
+- Each key is an SSM SecureString parameter at /{SHUTTLE_PREFIX}/{project}/{env}/{KEY}
+  (default prefix: /shuttle/). Example: /shuttle/myapp/production/DATABASE_URL.
+- Sign-in is GitHub OAuth. Roles: viewer, editor, restricted editor, admin
+  (admins come from the ADMIN_GITHUB_USERS env var).
+- Environments named in PROTECTED_ENVS (default: production) require typing the
+  environment name before writes/deletes.
+- Every write creates a new SSM parameter version; history and restore are supported.
+- If Shuttle is down, secrets are unaffected — they are ordinary SSM parameters
+  readable by anything with AWS credentials.
+
+## Setup (admin, step by step)
+
+1. Deploy: cd deploy && cp .env.example .env, fill values
+   (SESSION_SECRET=$(openssl rand -hex 32)), docker compose up -d.
+2. Give the server AWS credentials via env vars or an IAM role (standard SDK chain).
+3. Attach the IAM policy scoped to parameter/{prefix}/* — copy it from the in-app
+   Setup page or use deploy/iam/fill.sh. If KMS_KEY_ID is a customer-managed key,
+   also grant kms:GenerateDataKey and kms:Decrypt on it.
+4. Create a GitHub OAuth App; callback URL is {PUBLIC_URL}/api/auth/github/callback.
+5. Set ALLOWED_GITHUB_USERS or ALLOWED_GITHUB_ORG, and ADMIN_GITHUB_USERS.
+6. Sign in as admin, open Setup, run the permission probes.
+7. Create a project; default environments are development, staging, production.
+
+## For agents and automation
+
+Agents and CI should call AWS Parameter Store directly, not Shuttle's API
+(the API requires an interactive GitHub-OAuth session). Use AWS credentials with
+ssm:GetParameter / ssm:GetParametersByPath on the prefix:
+
+  aws ssm get-parameters-by-path \
+    --path /shuttle/myapp/production --with-decryption
+
+Values are SecureStrings — always pass --with-decryption when reading.
+GitHub Actions can authenticate via OIDC roles generated on the GitHub page;
+no AWS keys are stored in GitHub.
+
+## Configuration
+
+All config is environment variables, validated at startup: PUBLIC_URL,
+SESSION_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, ALLOWED_GITHUB_USERS or
+ALLOWED_GITHUB_ORG, ADMIN_GITHUB_USERS, AWS_REGION are required. Optional:
+SHUTTLE_PREFIX (default "shuttle"), KMS_KEY_ID, PROTECTED_ENVS, DATA_DIR,
+PORT, LOG_LEVEL, TRUST_PROXY.
+
+## Docs
+
+- In-app documentation: /docs
+- Repository README: https://github.com/kisernl/shuttle
