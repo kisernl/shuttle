@@ -8,7 +8,8 @@
     "node": ">=20"
   },
   "scripts": {
-    "deploy": "node deploy.mjs"
+    "deploy": "node deploy.mjs",
+    "deploy:app": "node deploy-app.mjs"
   },
   "dependencies": {
     "@computesdk/platform": "0.2.6",

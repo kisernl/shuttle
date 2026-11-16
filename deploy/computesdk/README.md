@@ -60,6 +60,42 @@ For anything beyond a personal/hobby deployment, prefer the Dockerfile-based
 targets (`railway.json`, `render.yaml`, `fly.toml`) — sandboxes are billed per
 wall-clock hour and are built for ephemeral compute.
 
+## Platform deployments (beta)
+
+`deploy-app.mjs` uses the platform's managed **deployments** API instead of
+driving a sandbox by hand. You submit a spec (`repo`, `secrets`, `cwd`,
+`setup`, `start`, `port`) and the platform clones/pulls the repo, runs `setup`,
+spawns `start`, probes the port, and exposes the public URL.
+
+```bash
+COMPUTE_API_KEY=cs_... node deploy-app.mjs \
+  --secret SESSION_SECRET --secret GITHUB_CLIENT_ID \
+  --secret GITHUB_CLIENT_SECRET --secret ALLOWED_GITHUB_USERS \
+  --secret ADMIN_GITHUB_USERS --secret AWS_REGION \
+  --secret AWS_ACCESS_KEY_ID --secret AWS_SECRET_ACCESS_KEY
+```
+
+Key differences from `deploy.mjs`:
+
+- **Env vars come from the org vault, not a file.** `--secret NAME` lists vault
+  secret names injected as env vars on the box — create them in the platform
+  UI or `compute actions vault` first.
+- **`PUBLIC_URL` needs two deploys.** The URL only exists after the first
+  deploy; set the `PUBLIC_URL` vault secret to the returned URL and deploy
+  again so OAuth callbacks line up.
+- **Private repos:** pass `--token-env GITHUB_TOKEN` and store the token in
+  the vault; the platform clones via `x-access-token`.
+- The default `setup` installs Node 22 + pnpm when missing, runs
+  `pnpm install --frozen-lockfile` and builds web + server; `start` runs
+  `node server/dist/index.js` (binds `0.0.0.0:3000` — required for the proxy).
+  Override with `--setup`/`--start` if needed.
+- The API surface is beta — the endpoint path defaults to
+  `POST /api/v1/deployments` and can be overridden with
+  `COMPUTE_DEPLOY_API_BASE`/`COMPUTE_DEPLOY_PATH` if it differs.
+
+`--dry-run` prints the spec without submitting; `--repo`, `--ref`, `--cwd`,
+`--port`, `--token-env` tune it.
+
 ## GitHub OAuth
 
 Set the OAuth app's callback URL to

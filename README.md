@@ -82,7 +82,9 @@ volume at `/data`, `TRUST_PROXY=true`, and the env vars from
   `deploy/render.md`.
 - `fly.toml` — Fly.io (Dockerfile build + volume; see `deploy/fly.md`).
 - `deploy/computesdk/` — deploy into a ComputeSDK hosted sandbox via the
-  platform router (one org API key, no provider keys); see its README.
+  platform router (one org API key, no provider keys); `deploy.mjs` drives a
+  sandbox directly, `deploy-app.mjs` uses the managed deployments API (beta).
+  See its README.
 
 No config file needed for these — both are set up in their dashboards:
 
