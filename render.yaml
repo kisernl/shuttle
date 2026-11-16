@@ -1,0 +1,54 @@
+# Shuttle on Render — https://render.com/docs/blueprint-spec
+#
+# Deploy: Render dashboard → New → Blueprint → connect this repo. Render prompts
+# for every `sync: false` variable at apply time. Secrets stay out of git.
+#
+# Notes:
+# - Persistent disks require a paid instance (starter and up); the free tier
+#   has no disk and spins down.
+# - PORT is injected by Render; the app reads it automatically.
+# - Custom domain: service → Settings → Custom Domains, then set PUBLIC_URL.
+
+services:
+  - type: web
+    name: shuttle
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./deploy/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/healthz
+    disk:
+      name: shuttle-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "true"
+      - key: SHUTTLE_PREFIX
+        value: shuttle
+      - key: PROTECTED_ENVS
+        value: production
+      - key: PUBLIC_URL
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: ALLOWED_GITHUB_USERS
+        sync: false
+      - key: ALLOWED_GITHUB_ORG
+        sync: false
+      - key: ADMIN_GITHUB_USERS
+        sync: false
+      - key: AWS_REGION
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: KMS_KEY_ID
+        sync: false

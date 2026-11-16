@@ -73,6 +73,26 @@ See `deploy/`:
 - `iam/` — required Parameter Store policy and the optional read-only check
   policy; `fill.sh` stamps in your account/region/prefix.
 
+Managed-platform configs at the repo root (all options below need a persistent
+volume at `/data`, `TRUST_PROXY=true`, and the env vars from
+`deploy/.env.example`):
+
+- `railway.json` — Railway (Dockerfile builder); see `deploy/railway.md`.
+- `render.yaml` — Render Blueprint (Docker runtime + disk); see
+  `deploy/render.md`.
+- `fly.toml` — Fly.io (Dockerfile build + volume; see `deploy/fly.md`).
+- `deploy/computesdk/` — deploy into a ComputeSDK hosted sandbox via the
+  platform router (one org API key, no provider keys); see its README.
+
+No config file needed for these — both are set up in their dashboards:
+
+- **Northflank** — Git-connected Dockerfile build (`deploy/Dockerfile`),
+  persistent volume mounted at `/data`, custom domain; closest Railway/Render
+  alternative. See `deploy/northflank.md`.
+- **AWS Lightsail Container Service** — managed containers with optional
+  persistent storage at `/data`; good fit since Shuttle already lives in AWS
+  (SSM/IAM). See `deploy/lightsail.md`.
+
 Quickstart:
 
 ```bash
@@ -85,6 +105,7 @@ docker compose up -d
 ### GitHub OAuth App
 
 Create a GitHub OAuth App at github.com → Settings → Developer settings:
+
 - Homepage URL: `https://shuttle.myapp.com`
 - Callback URL: `https://shuttle.myapp.com/api/auth/github/callback`
 

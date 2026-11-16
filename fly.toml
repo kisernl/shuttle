@@ -1,0 +1,41 @@
+# Shuttle on Fly.io — https://fly.io/docs/reference/configuration/
+#
+# First-time setup:
+#   fly apps create <unique-app-name>     # then set `app` below to match
+#   fly volumes create shuttle_data --size 1 --region <region>
+#   fly secrets set PUBLIC_URL=https://<app>.fly.dev \
+#     SESSION_SECRET=$(openssl rand -hex 32) \
+#     GITHUB_CLIENT_ID=... GITHUB_CLIENT_SECRET=... \
+#     ALLOWED_GITHUB_USERS=you ADMIN_GITHUB_USERS=you \
+#     AWS_REGION=us-east-1 \
+#     AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=...
+#   fly deploy
+#
+# Custom domain: fly certs add shuttle.example.com, then
+# `fly ips add <app>.fly.dev`-style DNS per https://fly.io/docs/networking/custom-domain/
+
+app = "shuttle"
+primary_region = "iad"
+
+[build]
+  dockerfile = "deploy/Dockerfile"
+
+[env]
+  PORT = "3000"
+  TRUST_PROXY = "true"
+  SHUTTLE_PREFIX = "shuttle"
+  PROTECTED_ENVS = "production"
+  # LOG_LEVEL = "info"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  # SQLite lives on the volume, so machines can stop when idle and cold-start
+  # on the next request. Set auto_stop_machines = "off" for always-on.
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[mounts]]
+  source = "shuttle_data"
+  destination = "/data"

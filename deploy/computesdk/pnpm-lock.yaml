@@ -1,0 +1,61 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@computesdk/platform':
+        specifier: 0.2.6
+        version: 0.2.6
+      computesdk:
+        specifier: 4.1.18
+        version: 4.1.18
+
+packages:
+
+  '@computesdk/cmd@0.4.1':
+    resolution: {integrity: sha512-hhcYrwMnOpRSwWma3gkUeAVsDFG56nURwSaQx8vCepv0IuUv39bK4mMkgszolnUQrVjBDdW7b3lV+l5B2S8fRA==}
+
+  '@computesdk/platform@0.2.6':
+    resolution: {integrity: sha512-kJabTbPLt7qkHb64mbdH293TIh1Vy0iPOIBByXLLAWItnl6qgSPbVUQ2fnGiWo9HRXCvx18Ss0+azTp+tC19Ow==}
+    peerDependencies:
+      '@benchsdk/cli': ^0.9.3
+    peerDependenciesMeta:
+      '@benchsdk/cli':
+        optional: true
+
+  '@computesdk/provider@2.1.24':
+    resolution: {integrity: sha512-zQ+CmMEkfnhCgnI5BLlQAxQH088DEc9/97wmHELxYMzPDGoFwQppYrKn/lpsd3zUoZtTBRB1+74sSsAcjTwVuA==}
+
+  computesdk@4.1.18:
+    resolution: {integrity: sha512-rOitYGTlGo9dYiVctR9/LrN6YEg2tH1hTqdxgok1KVEyWqoaw9rIJLmMLf1DvHkdzpoWTwjxMGdf4bw2qw8n5w==}
+
+  daemond@0.1.9:
+    resolution: {integrity: sha512-yNnvVVkAEQvvUgG7ow0jZlgzcmaWnQo6amRT7byr2UMHfzGJhO/nA4ZVszWR48B2d0Z6K3z4iW7fYHa/TDIiQw==}
+    engines: {node: '>=22.0.0'}
+    os: [linux, darwin]
+
+snapshots:
+
+  '@computesdk/cmd@0.4.1': {}
+
+  '@computesdk/platform@0.2.6':
+    dependencies:
+      '@computesdk/provider': 2.1.24
+
+  '@computesdk/provider@2.1.24':
+    dependencies:
+      '@computesdk/cmd': 0.4.1
+      computesdk: 4.1.18
+      daemond: 0.1.9
+
+  computesdk@4.1.18:
+    dependencies:
+      '@computesdk/cmd': 0.4.1
+      daemond: 0.1.9
+
+  daemond@0.1.9: {}
