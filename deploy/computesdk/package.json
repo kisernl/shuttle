@@ -9,7 +9,7 @@
   },
   "scripts": {
     "deploy": "node deploy.mjs",
-    "deploy:app": "node deploy-app.mjs"
+    "deploy:api": "node deploy-api.mjs"
   },
   "dependencies": {
     "@computesdk/platform": "0.2.6",

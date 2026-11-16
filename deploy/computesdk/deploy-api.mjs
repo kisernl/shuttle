@@ -24,7 +24,7 @@
  * set the PUBLIC_URL vault secret to the returned URL, then deploy again.
  *
  * Usage:
- *   COMPUTE_API_KEY=... node deploy-app.mjs --secret SESSION_SECRET \
+ *   COMPUTE_API_KEY=... node deploy-api.mjs --secret SESSION_SECRET \
  *     --secret GITHUB_CLIENT_ID --secret GITHUB_CLIENT_SECRET \
  *     --secret ALLOWED_GITHUB_USERS --secret ADMIN_GITHUB_USERS \
  *     --secret AWS_REGION --secret AWS_ACCESS_KEY_ID --secret AWS_SECRET_ACCESS_KEY
@@ -48,7 +48,7 @@ const API_BASE =
 const DEPLOY_PATH = process.env.COMPUTE_DEPLOY_PATH ?? "/deployments";
 
 function die(msg) {
-  console.error(`deploy-app: ${msg}`);
+  console.error(`deploy-api: ${msg}`);
   process.exit(1);
 }
 
@@ -57,7 +57,7 @@ const opts = {
   repo: null,
   ref: null,
   cwd: "app",
-  port: 3000,
+  port: 8080,
   tokenEnv: null,
   secrets: [],
   setup: null,
@@ -187,6 +187,7 @@ pnpm --filter @shuttle/server build`;
 // ../../web/dist relative to server/dist, and node_modules come from the
 // pnpm workspace install.
 const DEFAULT_START = `export PATH="/opt/node/bin:$PATH"
+export PORT="8080"
 exec node server/dist/index.js`;
 
 // ---------- spec ----------
@@ -225,7 +226,7 @@ try {
   body = text;
 }
 if (!res.ok) {
-  console.error(`deploy-app: HTTP ${res.status}`);
+  console.error(`deploy-api: HTTP ${res.status}`);
   console.error(
     typeof body === "string" ? body : JSON.stringify(body, null, 2),
   );

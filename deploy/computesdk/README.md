@@ -62,13 +62,30 @@ wall-clock hour and are built for ephemeral compute.
 
 ## Platform deployments (beta)
 
-`deploy-app.mjs` uses the platform's managed **deployments** API instead of
-driving a sandbox by hand. You submit a spec (`repo`, `secrets`, `cwd`,
-`setup`, `start`, `port`) and the platform clones/pulls the repo, runs `setup`,
-spawns `start`, probes the port, and exposes the public URL.
+The platform's managed **deployments** feature clones this repo and runs
+`./deploy-app.mjs` (repo root) detached. That script installs pnpm if needed,
+runs `pnpm install --frozen-lockfile`, builds the web SPA and server bundle,
+then execs `node server/dist/index.js` in-process on `0.0.0.0:$PORT`
+(default 8080). Env vars come from vault secrets; `PORT`, `NODE_ENV` and
+`TRUST_PROXY` have sane defaults.
+
+In the deployment UI: point it at `deploy-app.mjs` as the deploy script, port
+`8080`, and attach the Shuttle env vars (`SESSION_SECRET`, `GITHUB_CLIENT_*`,
+`ALLOWED_GITHUB_*`, `ADMIN_GITHUB_USERS`, `AWS_REGION`, `AWS_*`) as vault
+secrets.
+
+`PUBLIC_URL` needs two deploys: the public URL only exists after the first
+deploy — set the `PUBLIC_URL` secret to the returned URL and redeploy so OAuth
+callbacks and cookies line up.
+
+### API alternative: `deploy-api.mjs`
+
+`deploy-api.mjs` submits the same deployment as a spec (`repo`, `secrets`,
+`cwd`, `setup`, `start`, `port`) to the platform API instead of relying on the
+UI's script runner:
 
 ```bash
-COMPUTE_API_KEY=cs_... node deploy-app.mjs \
+COMPUTE_API_KEY=cs_... node deploy-api.mjs \
   --secret SESSION_SECRET --secret GITHUB_CLIENT_ID \
   --secret GITHUB_CLIENT_SECRET --secret ALLOWED_GITHUB_USERS \
   --secret ADMIN_GITHUB_USERS --secret AWS_REGION \
@@ -87,7 +104,7 @@ Key differences from `deploy.mjs`:
   the vault; the platform clones via `x-access-token`.
 - The default `setup` installs Node 22 + pnpm when missing, runs
   `pnpm install --frozen-lockfile` and builds web + server; `start` runs
-  `node server/dist/index.js` (binds `0.0.0.0:3000` — required for the proxy).
+  `node server/dist/index.js` (binds `0.0.0.0:8080` — required for the proxy).
   Override with `--setup`/`--start` if needed.
 - The API surface is beta — the endpoint path defaults to
   `POST /api/v1/deployments` and can be overridden with
