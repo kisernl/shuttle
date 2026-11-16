@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CheckCircle2, Copy, XCircle } from "lucide-react";
+import { CheckCircle2, Circle, Copy, XCircle } from "lucide-react";
 import { api, type Me } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,15 @@ interface Check {
   detail: string;
   message?: string;
 }
+interface ChecklistItem {
+  id: string;
+  ok: boolean | null;
+  title: string;
+  detail: string;
+  hint?: string;
+}
 interface SetupInfo {
+  checklist: ChecklistItem[];
   identity: Identity;
   iamPolicy: unknown;
   optionalIamPolicy: unknown;
@@ -55,10 +63,19 @@ function failureHint(c: Check, identity: Identity): string {
   if (/credentials|token|signature/i.test(c.detail + (c.message ?? ""))) {
     return "The server has no usable AWS credentials. Provide them through environment variables (AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY) or attach an IAM role to the instance, task, or pod running Shuttle, then restart.";
   }
-  if (/accessdenied|unauthorized|forbidden|not authorized/i.test(c.detail + (c.message ?? ""))) {
-    let hint = "The server's IAM identity isn't allowed this action. Attach the required policy below to the role or user this server runs as, and check the resource ARN matches your prefix.";
-    if (identity.kmsKeyId && (c.action === "ssm:PutParameter" || c.action === "ssm:GetParameter")) {
-      hint += " KMS_KEY_ID is a customer-managed key — the identity also needs kms:GenerateDataKey and kms:Decrypt on that key.";
+  if (
+    /accessdenied|unauthorized|forbidden|not authorized/i.test(
+      c.detail + (c.message ?? ""),
+    )
+  ) {
+    let hint =
+      "The server's IAM identity isn't allowed this action. Attach the required policy below to the role or user this server runs as, and check the resource ARN matches your prefix.";
+    if (
+      identity.kmsKeyId &&
+      (c.action === "ssm:PutParameter" || c.action === "ssm:GetParameter")
+    ) {
+      hint +=
+        " KMS_KEY_ID is a customer-managed key — the identity also needs kms:GenerateDataKey and kms:Decrypt on that key.";
     }
     return hint;
   }
@@ -89,7 +106,24 @@ export function SetupPage({ me }: { me: Me }) {
 
   const identity = result?.identity ?? info?.identity;
   const iamPolicy = result?.iamPolicy ?? info?.iamPolicy;
-  const optionalIamPolicy = result?.optionalIamPolicy ?? info?.optionalIamPolicy;
+  const optionalIamPolicy =
+    result?.optionalIamPolicy ?? info?.optionalIamPolicy;
+
+  // After "Run checks", fold the probe outcome into the aws-iam item.
+  const baseChecklist = result?.checklist ?? info?.checklist ?? [];
+  const checklist = result?.checks
+    ? baseChecklist.map((item) =>
+        item.id === "aws-iam"
+          ? {
+              ...item,
+              ok: result.checks.every((c) => c.ok),
+              detail: result.checks.every((c) => c.ok)
+                ? "All SSM permission probes passed."
+                : `${result.checks.filter((c) => !c.ok).length} probe(s) failed — see below.`,
+            }
+          : item,
+      )
+    : baseChecklist;
 
   return (
     <div className="space-y-6">
@@ -97,12 +131,14 @@ export function SetupPage({ me }: { me: Me }) {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Setup check</h1>
           <p className="text-sm text-muted-foreground">
-            Verifies that this server's AWS credentials can manage secrets in Parameter Store —
-            including a real write/delete probe. The sections below list everything that must be
-            true for the checks to pass.
+            Verifies that this server's AWS credentials can manage secrets in
+            Parameter Store — including a real write/delete probe. The sections
+            below list everything that must be true for the checks to pass.
           </p>
         </div>
-        <Button onClick={run} disabled={busy}>{busy ? "Running…" : "Run checks"}</Button>
+        <Button onClick={run} disabled={busy}>
+          {busy ? "Running…" : "Run checks"}
+        </Button>
       </div>
 
       {infoError && (
@@ -113,47 +149,108 @@ export function SetupPage({ me }: { me: Me }) {
 
       {identity && (
         <Card>
-          <CardHeader><CardTitle className="text-base">What the server needs</CardTitle></CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-base">Deployment checklist</CardTitle>
+            <Badge
+              variant={
+                checklist.every((i) => i.ok !== false)
+                  ? "success"
+                  : "destructive"
+              }
+            >
+              {checklist.filter((i) => i.ok === false).length === 0
+                ? "all clear"
+                : `${checklist.filter((i) => i.ok === false).length} issue(s)`}
+            </Badge>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {checklist.map((item) => (
+              <div key={item.id} className="flex items-start gap-2 text-sm">
+                {item.ok === true ? (
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
+                ) : item.ok === false ? (
+                  <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                ) : (
+                  <Circle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                )}
+                <div>
+                  <span className="font-medium">{item.title}.</span>{" "}
+                  <span className="text-muted-foreground">{item.detail}</span>
+                  {item.ok === false && item.hint && (
+                    <p className="pt-0.5 text-xs text-muted-foreground">
+                      {item.hint}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {identity && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">What the server needs</CardTitle>
+          </CardHeader>
           <CardContent>
             <ol className="list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
               <li>
-                <strong className="text-foreground">AWS credentials on this server.</strong> Shuttle
-                uses the standard AWS SDK credential chain — environment variables
-                (<code className="font-mono">AWS_ACCESS_KEY_ID</code> /{" "}
-                <code className="font-mono">AWS_SECRET_ACCESS_KEY</code>) or the IAM role attached
-                to the instance, task, or pod. There is no AWS configuration inside Shuttle itself.
+                <strong className="text-foreground">
+                  AWS credentials on this server.
+                </strong>{" "}
+                Shuttle uses the standard AWS SDK credential chain — environment
+                variables (<code className="font-mono">AWS_ACCESS_KEY_ID</code>{" "}
+                / <code className="font-mono">AWS_SECRET_ACCESS_KEY</code>) or
+                the IAM role attached to the instance, task, or pod. There is no
+                AWS configuration inside Shuttle itself.
               </li>
               <li>
-                <strong className="text-foreground">The required IAM policy below,</strong> attached
-                to that role or user. All secrets live under{" "}
-                <code className="font-mono">/{identity.prefix}/</code> and the policy is scoped
-                to <code className="font-mono">parameter/{identity.prefix}/*</code>, plus
-                account-wide <code className="font-mono">ssm:DescribeParameters</code> (AWS does
-                not allow that action to be path-scoped).
+                <strong className="text-foreground">
+                  The required IAM policy below,
+                </strong>{" "}
+                attached to that role or user. All secrets live under{" "}
+                <code className="font-mono">/{identity.prefix}/</code> and the
+                policy is scoped to{" "}
+                <code className="font-mono">parameter/{identity.prefix}/*</code>
+                , plus account-wide{" "}
+                <code className="font-mono">ssm:DescribeParameters</code> (AWS
+                does not allow that action to be path-scoped).
               </li>
               <li>
                 {identity.kmsKeyId ? (
                   <>
-                    <strong className="text-foreground">KMS permissions.</strong>{" "}
-                    <code className="font-mono">KMS_KEY_ID</code> is set to a customer-managed key,
-                    so the identity also needs <code className="font-mono">kms:GenerateDataKey</code>{" "}
-                    and <code className="font-mono">kms:Decrypt</code> on that key — grant them on
-                    the key policy or in IAM.
+                    <strong className="text-foreground">
+                      KMS permissions.
+                    </strong>{" "}
+                    <code className="font-mono">KMS_KEY_ID</code> is set to a
+                    customer-managed key, so the identity also needs{" "}
+                    <code className="font-mono">kms:GenerateDataKey</code> and{" "}
+                    <code className="font-mono">kms:Decrypt</code> on that key —
+                    grant them on the key policy or in IAM.
                   </>
                 ) : (
                   <>
-                    <strong className="text-foreground">No KMS setup needed.</strong> Secrets use the
-                    AWS-managed <code className="font-mono">alias/aws/ssm</code> key, which works
-                    without extra permissions. Set <code className="font-mono">KMS_KEY_ID</code> only
-                    if you want your own key.
+                    <strong className="text-foreground">
+                      No KMS setup needed.
+                    </strong>{" "}
+                    Secrets use the AWS-managed{" "}
+                    <code className="font-mono">alias/aws/ssm</code> key, which
+                    works without extra permissions. Set{" "}
+                    <code className="font-mono">KMS_KEY_ID</code> only if you
+                    want your own key.
                   </>
                 )}
               </li>
               <li>
-                <strong className="text-foreground">Then run the checks.</strong> The probe writes,
-                reads, and deletes a throwaway parameter at{" "}
-                <code className="font-mono">/{identity.prefix}/__probe__/TEST</code> — it does not
-                touch your real secrets.
+                <strong className="text-foreground">
+                  Then run the checks.
+                </strong>{" "}
+                The probe writes, reads, and deletes a throwaway parameter at{" "}
+                <code className="font-mono">
+                  /{identity.prefix}/__probe__/TEST
+                </code>{" "}
+                — it does not touch your real secrets.
               </li>
             </ol>
           </CardContent>
@@ -162,7 +259,9 @@ export function SetupPage({ me }: { me: Me }) {
 
       {identity && (
         <Card>
-          <CardHeader><CardTitle className="text-base">AWS identity</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">AWS identity</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-1 text-sm">
             {identity.account ? (
               <div className="space-y-1 font-mono">
@@ -172,8 +271,8 @@ export function SetupPage({ me }: { me: Me }) {
             ) : (
               <p className="text-destructive">
                 Could not resolve the server's AWS identity
-                {identity.error ? ` (${identity.error})` : ""} — the server most likely has no
-                credentials yet.
+                {identity.error ? ` (${identity.error})` : ""} — the server most
+                likely has no credentials yet.
               </p>
             )}
             <div className="font-mono">
@@ -183,8 +282,9 @@ export function SetupPage({ me }: { me: Me }) {
             </div>
             {!identity.account && (
               <p className="text-xs text-muted-foreground">
-                The policies below use <code className="font-mono">{"{ACCOUNT_ID}"}</code> — replace
-                it with your 12-digit AWS account ID before attaching.
+                The policies below use{" "}
+                <code className="font-mono">{"{ACCOUNT_ID}"}</code> — replace it
+                with your 12-digit AWS account ID before attaching.
               </p>
             )}
           </CardContent>
@@ -203,9 +303,11 @@ export function SetupPage({ me }: { me: Me }) {
             {result.checks.map((c) => (
               <div key={c.action} className="text-sm">
                 <div className="flex items-center gap-2">
-                  {c.ok
-                    ? <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600" />
-                    : <XCircle className="h-4 w-4 shrink-0 text-destructive" />}
+                  {c.ok ? (
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600" />
+                  ) : (
+                    <XCircle className="h-4 w-4 shrink-0 text-destructive" />
+                  )}
                   <span className="font-mono">{c.action}</span>
                   <span className="text-muted-foreground">
                     — {probePurpose(c.action, result.identity.prefix)}
@@ -214,9 +316,13 @@ export function SetupPage({ me }: { me: Me }) {
                 </div>
                 {!c.ok && (
                   <div className="space-y-1 pl-6 pt-1">
-                    <p className="text-muted-foreground">{failureHint(c, result.identity)}</p>
+                    <p className="text-muted-foreground">
+                      {failureHint(c, result.identity)}
+                    </p>
                     {c.message && (
-                      <p className="font-mono text-xs text-muted-foreground">{c.message}</p>
+                      <p className="font-mono text-xs text-muted-foreground">
+                        {c.message}
+                      </p>
                     )}
                   </div>
                 )}
@@ -258,13 +364,22 @@ function PolicyCard({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-base">{title}</CardTitle>
-        <Button variant="outline" size="sm" onClick={() => { void navigator.clipboard.writeText(json); toast.success("Copied"); }}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            void navigator.clipboard.writeText(json);
+            toast.success("Copied");
+          }}
+        >
           <Copy /> Copy
         </Button>
       </CardHeader>
       <CardContent className="space-y-2">
         <p className="text-sm text-muted-foreground">{description}</p>
-        <pre className="max-h-64 overflow-auto rounded-md bg-muted p-3 text-xs">{json}</pre>
+        <pre className="max-h-64 overflow-auto rounded-md bg-muted p-3 text-xs">
+          {json}
+        </pre>
       </CardContent>
     </Card>
   );

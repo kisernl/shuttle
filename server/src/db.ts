@@ -71,6 +71,16 @@ CREATE TABLE github_repos (
 );
 `,
   },
+  {
+    id: "0002_settings",
+    sql: `
+CREATE TABLE settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+`,
+  },
 ];
 
 export function openDb(dataDir: string): Database.Database {
@@ -98,6 +108,32 @@ function migrate(db: Database.Database): void {
       db.prepare("INSERT INTO migrations (id) VALUES (?)").run(m.id);
     })();
   }
+}
+
+export function getSetting(db: Database.Database, key: string): string | null {
+  const row = db.prepare("SELECT value FROM settings WHERE key = ?").get(key) as
+    | { value: string }
+    | undefined;
+  return row?.value ?? null;
+}
+
+export function setSetting(db: Database.Database, key: string, value: string): void {
+  db.prepare(
+    "INSERT INTO settings (key, value, updated_at) VALUES (?, ?, datetime('now')) " +
+      "ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
+  ).run(key, value);
+}
+
+export function deleteSetting(db: Database.Database, key: string): void {
+  db.prepare("DELETE FROM settings WHERE key = ?").run(key);
+}
+
+export function allSettings(db: Database.Database): Map<string, string> {
+  const rows = db.prepare("SELECT key, value FROM settings").all() as {
+    key: string;
+    value: string;
+  }[];
+  return new Map(rows.map((r) => [r.key, r.value]));
 }
 
 /** Startup task: drop audit rows older than the retention window. */

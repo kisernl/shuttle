@@ -4,6 +4,8 @@ import {
 } from "lucide-react";
 import { useMe } from "@/lib/hooks";
 import { api } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { SetupWizard } from "@/pages/SetupWizard";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ProjectsPage } from "@/pages/ProjectsPage";
@@ -16,10 +18,21 @@ import { DocsPage } from "@/pages/DocsPage";
 
 export default function App() {
   const { data: me, isLoading } = useMe();
+  const { data: setupStatus } = useQuery({
+    queryKey: ["setup-status"],
+    queryFn: () => api.get<{ setupMode: boolean }>("/api/setup/status"),
+    staleTime: 30_000,
+  });
   const location = useLocation();
   const denied = new URLSearchParams(location.search).get("denied");
 
-  if (isLoading) {
+  // Install mode: required env vars are missing — show the wizard instead of
+  // the login screen (there's no working OAuth yet anyway).
+  if (setupStatus?.setupMode) {
+    return <SetupWizard />;
+  }
+
+  if (isLoading || setupStatus === undefined) {
     return <div className="flex h-screen items-center justify-center text-muted-foreground">…</div>;
   }
 

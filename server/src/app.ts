@@ -36,6 +36,10 @@ export interface BuildOptions {
   iam?: IAMClient;
   sts?: STSClient;
   staticDir?: string;
+  /** Booted without required env vars: serve only healthz + setup routes. */
+  setupMode?: boolean;
+  configIssues?: string[];
+  onConfigured?: () => void | Promise<void>;
 }
 
 export async function buildApp(opts: BuildOptions): Promise<FastifyInstance> {
@@ -69,6 +73,9 @@ export async function buildApp(opts: BuildOptions): Promise<FastifyInstance> {
     params: new ParameterService(ssm, config.SHUTTLE_PREFIX, config.KMS_KEY_ID),
     github: new GithubSetupService(db, iam, sts, config.SHUTTLE_PREFIX, config.AWS_REGION),
     guard: makeGuard(db, config),
+    setupMode: opts.setupMode ?? false,
+    configIssues: opts.configIssues ?? [],
+    onConfigured: opts.onConfigured,
   };
 
   const limiter = new RateLimiter();
@@ -106,17 +113,23 @@ export async function buildApp(opts: BuildOptions): Promise<FastifyInstance> {
 
   // Routes
   miscRoutes(app);
-  authRoutes(app, db, config);
-  if (process.env.NODE_ENV === "test") testAuthRoutes(app, db);
-  meRoutes(app, ctx);
-  setupRoutes(app, ctx);
-  projectRoutes(app, ctx);
-  keyRoutes(app, ctx);
-  envioRoutes(app, ctx);
-  githubRoutes(app, ctx);
-  auditRoutes(app, ctx);
-  userRoutes(app, ctx);
-  snippetsRoutes(app, ctx);
+  if (ctx.setupMode) {
+    // Install mode: no auth routes (OAuth can't work without client creds) and
+    // no app routes — just the setup wizard + static SPA.
+    setupRoutes(app, ctx);
+  } else {
+    authRoutes(app, db, config);
+    if (process.env.NODE_ENV === "test") testAuthRoutes(app, db);
+    meRoutes(app, ctx);
+    setupRoutes(app, ctx);
+    projectRoutes(app, ctx);
+    keyRoutes(app, ctx);
+    envioRoutes(app, ctx);
+    githubRoutes(app, ctx);
+    auditRoutes(app, ctx);
+    userRoutes(app, ctx);
+    snippetsRoutes(app, ctx);
+  }
 
   // Static SPA + API 404 / SPA fallback
   if (staticDir && existsSync(staticDir)) {

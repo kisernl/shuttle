@@ -1,4 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
+import { randomBytes } from "node:crypto";
 import type { Config } from "@shuttle/shared";
 import { ApiError } from "./lib/errors.js";
 import type { RateLimiter } from "./lib/rateLimit.js";
@@ -35,6 +36,21 @@ export function registerHooks(
     }
 
     reply.headers(securityHeaders());
+
+    // Issue the double-submit CSRF cookie to anonymous API clients too —
+    // required for the setup wizard, which runs before any login exists.
+    if (
+      req.method === "GET" &&
+      req.url.startsWith("/api/") &&
+      req.cookies[CSRF_COOKIE] === undefined
+    ) {
+      reply.setCookie(CSRF_COOKIE, randomBytes(32).toString("hex"), {
+        path: "/",
+        httpOnly: false,
+        secure: config.PUBLIC_URL.startsWith("https://"),
+        sameSite: "lax",
+      });
+    }
 
     // Rate limits: login attempts per IP, then per-route buckets.
     if (req.url.startsWith("/api/auth/")) {

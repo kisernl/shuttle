@@ -10,4 +10,10 @@ export interface Ctx {
   params: ParameterService;
   github: GithubSetupService;
   guard: ReturnType<typeof makeGuard>;
+  /** True while required env vars are missing — only setup routes are live. */
+  setupMode: boolean;
+  /** Validation problems that put us in setup mode (empty otherwise). */
+  configIssues: string[];
+  /** Called after the wizard saves a now-valid config — rebuild the app. */
+  onConfigured?: () => void | Promise<void>;
 }
