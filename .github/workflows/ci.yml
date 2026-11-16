@@ -17,7 +17,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm -r typecheck
-      - run: pnpm -r test
+      - run: pnpm -r --filter='!@shuttle/e2e' test
       - run: pnpm -r build
       - run: pnpm audit --audit-level=high || true
 
@@ -42,7 +42,46 @@ jobs:
             sleep 2
           done
           exit 1
-      - run: SHUTTLE_TEST_LOCALSTACK=1 pnpm --filter @shuttle/server vitest run test/localstack.test.ts
+      - run: SHUTTLE_TEST_LOCALSTACK=1 pnpm --filter @shuttle/server exec vitest run test/localstack.test.ts
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: pnpm --filter @shuttle/e2e exec playwright install --with-deps chromium
+      - name: Build server
+        run: pnpm --filter @shuttle/server build
+      - name: Start server
+        env:
+          NODE_ENV: test
+          PORT: "3000"
+          PUBLIC_URL: http://localhost:3000
+          SESSION_SECRET: ci-test-secret-0123456789abcdef0123456789
+          GITHUB_CLIENT_ID: ci
+          GITHUB_CLIENT_SECRET: ci
+          ALLOWED_GITHUB_USERS: e2e-admin
+          ADMIN_GITHUB_USERS: e2e-admin
+          AWS_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          SHUTTLE_PREFIX: shuttle-ci
+          DATA_DIR: /tmp/shuttle-e2e-data
+        run: |
+          (node server/dist/index.js > /tmp/shuttle-e2e.log 2>&1 &)
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3000/api/healthz && exit 0
+            sleep 1
+          done
+          cat /tmp/shuttle-e2e.log
+          exit 1
+      - run: pnpm --filter @shuttle/e2e test
 
   docker:
     runs-on: ubuntu-latest
