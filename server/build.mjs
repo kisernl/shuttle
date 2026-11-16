@@ -1,11 +1,8 @@
-import { readFileSync } from "node:fs";
 import { build } from "esbuild";
 
-const deps = Object.keys(
-  JSON.parse(readFileSync("package.json", "utf8")).dependencies ?? {},
-);
-// Externalize real npm deps (name + subpaths); bundle workspace pkgs like @shuttle/shared
-const external = deps.filter((d) => !d.startsWith("@shuttle/")).flatMap((d) => [d, `${d}/*`]);
+// Bundle everything except the native module — dist/index.js is self-contained
+// except for better-sqlite3, which stays external and resolves from node_modules.
+const external = ["better-sqlite3", "better-sqlite3/*"];
 
 await build({
   entryPoints: ["src/index.ts"],

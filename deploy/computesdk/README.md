@@ -63,11 +63,20 @@ wall-clock hour and are built for ephemeral compute.
 ## Platform deployments (beta)
 
 The platform's managed **deployments** feature clones this repo and runs
-`./deploy-app.mjs` (repo root) detached. That script installs pnpm if needed,
-runs `pnpm install --frozen-lockfile`, builds the web SPA and server bundle,
-then execs `node server/dist/index.js` in-process on `0.0.0.0:$PORT`
-(default 8080). Env vars come from vault secrets; `PORT`, `NODE_ENV` and
-`TRUST_PROXY` have sane defaults.
+`./deploy-app.mjs` (repo root) detached. That script first tries to download
+the prebuilt `shuttle-dist.tar.gz` attached to the latest GitHub release
+(server bundle + web assets + runtime deps, ~3 MB — built by
+`scripts/package-dist.mjs` in the release workflow), extracts it to
+`.deploy-dist/`, and imports the server in-process on `0.0.0.0:$PORT`
+(default 8080). If no release asset exists yet (or `SHUTTLE_DIST_URL` points
+elsewhere), it falls back to `pnpm install --frozen-lockfile` + builds —
+slower but always works. `SHUTTLE_USE_SOURCE=1` forces the source path.
+Env vars come from vault secrets; `PORT`, `NODE_ENV` and `TRUST_PROXY` have
+sane defaults.
+
+Note: the tarball ships the `better-sqlite3` prebuilt for linux-x64 glibc
+(the release runner). On other architectures the binding won't load — set
+`SHUTTLE_USE_SOURCE=1` so pnpm compiles it on the box instead.
 
 In the deployment UI: point it at `deploy-app.mjs` as the deploy script, port
 `8080`, and attach the Shuttle env vars (`SESSION_SECRET`, `GITHUB_CLIENT_*`,
@@ -102,10 +111,10 @@ Key differences from `deploy.mjs`:
   again so OAuth callbacks line up.
 - **Private repos:** pass `--token-env GITHUB_TOKEN` and store the token in
   the vault; the platform clones via `x-access-token`.
-- The default `setup` installs Node 22 + pnpm when missing, runs
-  `pnpm install --frozen-lockfile` and builds web + server; `start` runs
-  `node server/dist/index.js` (binds `0.0.0.0:8080` — required for the proxy).
-  Override with `--setup`/`--start` if needed.
+- The default `setup` only ensures Node 22 is on the box; `start` runs
+  `./deploy-app.mjs`, which downloads the release tarball (or falls back to
+  `pnpm install --frozen-lockfile` + builds) and serves `0.0.0.0:8080` —
+  required for the proxy. Override with `--setup`/`--start` if needed.
 - The API surface is beta — the endpoint path defaults to
   `POST /api/v1/deployments` and can be overridden with
   `COMPUTE_DEPLOY_API_BASE`/`COMPUTE_DEPLOY_PATH` if it differs.

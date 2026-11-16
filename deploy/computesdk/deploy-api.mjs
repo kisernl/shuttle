@@ -162,6 +162,8 @@ if (!repoUrl)
 
 // ---------- setup / start ----------
 // POSIX sh only (the platform runs `setup` via sh — no bashisms).
+// setup only guarantees Node 22 — deploy-app.mjs needs it for its shebang and
+// then handles everything else (prebuilt dist download or pnpm source build).
 const DEFAULT_SETUP = `set -e
 export PATH="/opt/node/bin:$PATH"
 if ! command -v node >/dev/null 2>&1 || [ "$(node -p "process.versions.node.split('.')[0]")" != "22" ]; then
@@ -177,18 +179,13 @@ if ! command -v node >/dev/null 2>&1 || [ "$(node -p "process.versions.node.spli
   curl -fsSL "$base/$f" -o /tmp/node.tar.xz
   mkdir -p /opt/node
   tar -xJf /tmp/node.tar.xz -C /opt/node --strip-components=1
-fi
-command -v pnpm >/dev/null 2>&1 || npm install -g pnpm@10.33.0
-pnpm install --frozen-lockfile
-pnpm --filter @shuttle/web build
-pnpm --filter @shuttle/server build`;
+fi`;
 
-// cwd is the repo root inside the box; the server bundle resolves the SPA at
-// ../../web/dist relative to server/dist, and node_modules come from the
-// pnpm workspace install.
+// cwd is the repo root inside the box; deploy-app.mjs downloads the release
+// tarball (or falls back to pnpm install + build) and serves :8080 itself.
 const DEFAULT_START = `export PATH="/opt/node/bin:$PATH"
 export PORT="8080"
-exec node server/dist/index.js`;
+exec ./deploy-app.mjs`;
 
 // ---------- spec ----------
 const spec = {
