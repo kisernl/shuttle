@@ -13,7 +13,7 @@
   "dependencies": {
     "@aws-sdk/client-iam": "^3.750.0",
     "@aws-sdk/client-ssm": "^3.750.0",
-    "@aws-sdk/client-sts": "^3.750.0",
+    "@aws-sdk/client-sts": "^3.1169.0",
     "@fastify/cookie": "^11.0.2",
     "@fastify/static": "^8.0.4",
     "@shuttle/shared": "workspace:*",
